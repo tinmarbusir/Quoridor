@@ -71,15 +71,26 @@ class InterfaceCorridor:
             self.objets[num] = Muret(id_canevas=num, x_grille=i, y_grille=j)
             self.murets[i, j] = num
 
+        for i, j in product(range(1, self.cote + 1, 2), range(1, self.cote + 1, 2)):  # de 1 à 15, 1 à 15
+            # interstice entre les murets
+            coords_I = self.calcul_coords_interface((i, j))
+            num = self.canevas.create_rectangle(*coords_I, fill="grey", tags="interstice")
+            self.objets[num] = Muret(id_canevas=num, x_grille=i, y_grille=j)
+            self.murets[i, j] = num
+
         ###################
         # les joueurs  ####
         ###################
         self.joueurs = partie.joueurs
         self.id_pions = {}
         self.pions = {}
-        for joueur in self.joueurs:
+        if len(self.joueurs) == 2:
+            couleur_pions = ('white', 'black')  # "#{:0>6x}".format(randint(0, 256 ** 3 - 1))
+        else:
+            couleur_pions = ('white', 'grey', 'black', 'brown')  # "#{:0>6x}".format(randint(0, 256 ** 3 - 1))
+        for i, joueur in enumerate(self.joueurs):
             coords_I = self.calcul_coords_interface(joueur.coords)
-            num = self.canevas.create_oval(*coords_I, fill="#{:0>6x}".format(randint(0, 256 ** 3 - 1)), tags="pion")
+            num = self.canevas.create_oval(*coords_I, fill=couleur_pions[i], tags="pion")
             x, y = joueur.coords
             self.objets[num] = Pion(id_canevas=num, x_grille=x, y_grille=y, joueur=joueur)
             self.id_pions[joueur] = num
@@ -159,11 +170,11 @@ class InterfaceCorridor:
 
         joueur = self.partie.joueur_en_cours
         coord_j = joueur.coords
-        coords_en_cours = self.partie.plateau.coord_voisins_immediats(coord_j)
+        coords_possible = self.partie.plateau.coord_voisins_immediats(coord_j)
         self.canevas.itemconfig(self.grille[coord_j], fill="blue")
         for coord in joueur.zone_arrivee:
             self.canevas.itemconfig(self.grille[coord], fill="pink")
-        for coord in coords_en_cours:
+        for coord in coords_possible:
             self.canevas.itemconfig(self.grille[coord], fill="grey")
 
     def partie_terminee(self):
@@ -179,10 +190,14 @@ class InterfaceCorridor:
         x1 = (x // 2) * self.DIMS['carre']
         y1 = (y // 2) * self.DIMS['carre']
 
-        if x % 2:  # Impair, C'est un muret Vertical
+        if x % 2:  # Impair, C'est un muret Vertical ou un interstice
             x1 += self.DIMS['pion']
             x2 = x1 + self.DIMS['muret']
-            y2 = y1 + self.DIMS['pion']
+            if y % 2:  # Impair et Impair, c'est un interstice entre 2 murets
+                y1 += self.DIMS['pion']
+                y2 = y1 + self.DIMS['muret']
+            else:
+                y2 = y1 + self.DIMS['pion']
         elif y % 2:  # Impair, C'est un muret Horizontal
             y1 += self.DIMS['pion']
             x2 = x1 + self.DIMS['pion']

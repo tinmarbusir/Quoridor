@@ -4,13 +4,14 @@ from Plateau import Plateau
 
 class Partie:
 
-    def __init__(self, nb_joueurs, nb_cases=9):
+    def __init__(self, nb_joueurs, nb_cases=9, largeur_muret=2):
         ###########################
         ### Initialiser plateau
         ###########################
         self.nb_cases = nb_cases
         self.case_max = (nb_cases - 1) * 2
-        self.plateau = Plateau(nb_cases)
+        self.largeur_muret = largeur_muret
+        self.plateau = Plateau(nb_cases, largeur_muret)
         if nb_joueurs not in (2, 4):
             raise(TypeError, "nb joueurs : 2 ou 4")
         milieuj1 = self.case_max // 4 * 2
@@ -49,21 +50,31 @@ class Partie:
 
 
     def bloquer(self, coords):
-        # x, y, position = coords
         if not self.joueur_en_cours:
             self.message("La partie est terminée.")
             return
         if not self.joueur_en_cours.nb_murets:
             self.message(f"{self.joueur_en_cours} n'a plus de murets")
             return
+        x, y = coords
+        if x % 2 and y % 2:
+            self.message(f"{coords} est un interstice! Impossible à jouer")
+            return
+
         if not self.plateau.ajouter_muret(coords):
             self.message('Blocage non autorisé')
             return
         self.message(f"{self.joueur_en_cours} pose muret en {coords}")
         self.joueur_en_cours.nb_murets -= 1
-        self.interface.bloquer_muret(coords)
-        #for joueur in self.joueurs:
-        #    joueur.calcul_chemins()
+
+        x, y = coords
+
+        for supp in range(self.largeur_muret * 2 - 1):
+            if x % 2:  # muret vertical
+                coord_muret = (x, y + supp)
+            else:
+                coord_muret = (x + supp, y)
+            self.interface.bloquer_muret(coord_muret)
         self.tour_suivant()
 
     def avancer_pion(self, coords):
@@ -83,4 +94,4 @@ class Partie:
         self.tour_suivant()
 
 
-Partie(2, 9)
+Partie(4, nb_cases=9, largeur_muret=2)

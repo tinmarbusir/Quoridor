@@ -1,8 +1,9 @@
 from copy import copy
 
 class Plateau:
-    def __init__(self, nb_cases):
+    def __init__(self, nb_cases, largeur_muret):
         self.nb_cases = nb_cases
+        self.largeur_muret = largeur_muret
         self.cote = (nb_cases - 1) * 2  # 16 pour 9 cases de large
         self.coords_murets = []  # de type (1, 1) , coordonnées impaires de 1 à 15
         self.joueurs = []  # append lors de l'initialisation d'un joueur
@@ -11,15 +12,15 @@ class Plateau:
         return value in self.coords_murets
 
     def __copy__(self):
-        copie = Plateau(self.nb_cases)
+        copie = Plateau(self.nb_cases, self.largeur_muret)
         copie.coords_murets = self.coords_murets[:]
         copie.joueurs = self.joueurs
         return copie
 
-    def __add__(self, coords):
-        """return another Plateau + coords"""
+    def __add__(self, coord):
+        """return another Plateau + coord"""
         plateau_test = copy(self)
-        plateau_test += coords
+        plateau_test += coord
         return plateau_test
 
     def __iadd__(self, coords):
@@ -27,22 +28,33 @@ class Plateau:
         self.coords_murets.append(coords)
         return self
 
-    def ajouter_muret(self, coords):
+    def ajouter_muret(self, coord):
         # coords = (x, y, position)
-        if coords not in self:
-            plateau_test = self + coords
 
+        if coord not in self:
+            x, y = coord
+            plateau_test = copy(self)
+            for supp in range(self.largeur_muret * 2 - 1):
+                if x % 2:  # muret vertical
+                    coord_test = (x, y + supp)
+                else:
+                    coord_test = (x + supp, y)
+                if coord_test in self:
+                    print(f"pose impossible du muret {coord}. case {coord_test} déjà posée")
+                    return False
+                else:
+                    plateau_test += coord_test
             for joueur in self.joueurs:
                 if not joueur.teste_plateau(plateau_test):
                     print(f"bloquant pour {joueur}")
                     break
             else:
-                self += coords
+                self.coords_murets = plateau_test.coords_murets[:]
                 return True
         return False
 
-    def coord_voisins(self, coords):
-        x, y = coords
+    def coord_voisins(self, coord):
+        x, y = coord
         voisins = set()
         if x > 0 and (x - 1, y) not in self:
             # Vers l' Ouest
@@ -58,8 +70,8 @@ class Plateau:
             voisins.add((x, y + 2))
         return list(voisins)
 
-    def coord_voisins_immediats(self, coords):
-        x, y = coords
+    def coord_voisins_immediats(self, coord):
+        x, y = coord
         coords_joueurs = [joueur.coords for joueur in self.joueurs]
         voisins = set()
         if x > 0 and (x - 1, y) not in self:
