@@ -94,4 +94,4 @@ class Partie:
         self.tour_suivant()
 
 
-Partie(4, nb_cases=9, largeur_muret=2)
+Partie(2, nb_cases=9, largeur_muret=2)

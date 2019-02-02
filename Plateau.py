@@ -37,8 +37,14 @@ class Plateau:
             for supp in range(self.largeur_muret * 2 - 1):
                 if x % 2:  # muret vertical
                     coord_test = (x, y + supp)
+                    if y + supp > self.cote:
+                        print(f"pose impossible du muret {coord}. il finit en dehors du terrain")
+                        return False
                 else:
                     coord_test = (x + supp, y)
+                    if x + supp > self.cote:
+                        print(f"pose impossible du muret {coord}. il finit en dehors du terrain")
+                        return False
                 if coord_test in self:
                     print(f"pose impossible du muret {coord}. case {coord_test} déjà posée")
                     return False
