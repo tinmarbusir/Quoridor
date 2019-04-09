@@ -113,7 +113,7 @@ class Plateau:
                 if y == 2 or (x, y - 3) in self:
                     if (x - 1, y - 2) not in self:
                         voisins.add((x - 2, y - 2))
-                    if (x - 1, y - 2) not in self:
+                    if (x + 1, y - 2) not in self:
                         voisins.add((x + 2, y - 2))
                 else:
                     voisins.add((x, y - 4))
@@ -127,7 +127,7 @@ class Plateau:
                 if y == 14 or (x, y + 3) in self:
                     if (x - 1, y + 2) not in self:
                         voisins.add((x - 2, y + 2))
-                    if (x - 1, y + 2) not in self:
+                    if (x + 1, y + 2) not in self:
                         voisins.add((x + 2, y + 2))
                 else:
                     voisins.add((x, y + 4))
